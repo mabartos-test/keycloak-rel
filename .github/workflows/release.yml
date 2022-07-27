@@ -40,14 +40,23 @@ jobs:
     uses: ./.github/workflows/x-keycloak-nodejs-admin.yml
     with:
       tag: ${{ github.event.inputs.version }}
-      version: ${{ github.event.inputs.version }}
+    secrets:
+      GH_ORG: ${{ secrets.GH_ORG }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+  keycloak-js:
+    name: Keycloak JS
+    needs: [create-tags, create-gh-releases]
+    uses: ./.github/workflows/x-keycloak-js.yml
+    with:
+      tag: ${{ github.event.inputs.version }}
     secrets:
       GH_ORG: ${{ secrets.GH_ORG }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
   keycloak-admin-console:
     name: Keycloak Admin Console
-    needs: [create-tags,keycloak-nodejs-admin]
+    needs: [create-tags, keycloak-nodejs-admin, keycloak-js]
     uses: ./.github/workflows/x-keycloak-admin-console.yml
     with:
       version: ${{ github.event.inputs.version }}
@@ -132,7 +141,7 @@ jobs:
 
   publish-gh-releases:
     name: Publish releases
-    needs: [keycloak, keycloak-documentation, keycloak-nodejs-admin]
+    needs: [keycloak, keycloak-documentation, keycloak-nodejs-admin, keycloak-js]
     uses: ./.github/workflows/x-publish-gh-releases.yml
     with:
       tag: ${{ github.event.inputs.version }}
@@ -142,7 +151,7 @@ jobs:
 
   publish-npm:
     name: Publish NPM packages
-    needs: [keycloak-nodejs-admin]
+    needs: [keycloak-nodejs-admin, keycloak-js]
     uses: ./.github/workflows/x-publish-npm.yml
     with:
       tag: ${{ github.event.inputs.version }}

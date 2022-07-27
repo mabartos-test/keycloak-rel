@@ -17,8 +17,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        repository:
-          - keycloak-nodejs-admin-client
+        package:
+          - repo: keycloak-nodejs-admin-client
+            asset: keycloak-nodejs-admin-client.tgz
+          - repo: keycloak
+            asset: keycloak-js.tgz
     steps:
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -27,11 +30,11 @@ jobs:
           check-latest: true
 
       - name: Download tarball
-        run: gh release download ${{ inputs.tag }} --repo ${{ secrets.GH_ORG }}/${{ matrix.repository }}
+        run: gh release download ${{ inputs.tag }} --repo ${{ secrets.GH_ORG }}/${{ matrix.package.repo }}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Publish to NPM
-        run: npm publish ${{ matrix.repository }}.tgz --dry-run
+        run: npm publish ${{ matrix.package.asset }} --dry-run
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

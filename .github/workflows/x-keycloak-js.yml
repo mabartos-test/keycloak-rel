@@ -1,4 +1,4 @@
-name: X Keycloak Node.js Admin Client
+name: X Keycloak JS
 on:
   workflow_call:
     inputs:
@@ -17,9 +17,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          repository: ${{ secrets.GH_ORG }}/keycloak-nodejs-admin-client
+          repository: ${{ secrets.GH_ORG }}/keycloak
           token: ${{ secrets.GH_TOKEN }}
           ref: ${{ inputs.tag }}
+          path: keycloak
+
+      - name: Move directory
+        run: mv keycloak/adapters/oidc/js/* . && rm -r keycloak
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -43,9 +47,9 @@ jobs:
         run: |
           npm run prepublishOnly
           npm pack
-          mv -T *.tgz keycloak-nodejs-admin-client.tgz
+          mv -T *.tgz keycloak-js.tgz
 
       - name: Upload to GitHub Releases
-        run: gh release upload ${{ inputs.tag }} keycloak-nodejs-admin-client.tgz
+        run: gh release upload ${{ inputs.tag }} --repo ${{ secrets.GH_ORG }}/keycloak keycloak-js.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
